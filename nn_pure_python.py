@@ -99,26 +99,57 @@ class ThreeLayerNN:
         for epoch in range(epochs):
             train_loss = 0
             train_batches = 0
-            
+            train_correct = 0
+            train_total = 0
+
             for batch_images, batch_labels in train_loader:
                 batch_images = batch_images.reshape(batch_images.shape[0], -1)
-                
+
                 y_pred = self.forward(batch_images)
                 loss = cross_entropy_loss(y_pred, batch_labels)
                 train_loss += loss
                 train_batches += 1
-                
+
+                # Calculate accuracy
+                predicted = np.argmax(y_pred, axis=1)
+                actual = np.argmax(batch_labels, axis=1)
+                train_correct += np.sum(predicted == actual)
+                train_total += batch_labels.shape[0]
+
                 dout = cross_entropy_loss_gradient(y_pred, batch_labels)
                 self.backward(dout)
                 self.update_weights(learning_rate)
-            
+
             avg_train_loss = train_loss / train_batches
+            train_accuracy = train_correct / train_total
             self.train_losses.append(avg_train_loss)
-            
-            test_loss = self.evaluate(test_loader)
-            self.test_losses.append(test_loss)
-            
-            print(f'Epoch {epoch+1}/{epochs}, Train Loss: {avg_train_loss:.4f}, Test Loss: {test_loss:.4f}')
+
+            # Evaluate on test set
+            test_loss = 0
+            test_batches = 0
+            test_correct = 0
+            test_total = 0
+
+            for batch_images, batch_labels in test_loader:
+                batch_images = batch_images.reshape(batch_images.shape[0], -1)
+                y_pred = self.forward(batch_images)
+                loss = cross_entropy_loss(y_pred, batch_labels)
+                test_loss += loss
+                test_batches += 1
+
+                # Calculate accuracy
+                predicted = np.argmax(y_pred, axis=1)
+                actual = np.argmax(batch_labels, axis=1)
+                test_correct += np.sum(predicted == actual)
+                test_total += batch_labels.shape[0]
+
+            avg_test_loss = test_loss / test_batches
+            test_accuracy = test_correct / test_total
+            self.test_losses.append(avg_test_loss)
+
+            print(f'Epoch {epoch+1}/{epochs}, '
+                  f'Train Loss: {avg_train_loss:.4f}, Train Acc: {train_accuracy:.4f}, '
+                  f'Test Loss: {avg_test_loss:.4f}, Test Acc: {test_accuracy:.4f}')
     
     def evaluate(self, test_loader):
         test_loss = 0
@@ -288,10 +319,19 @@ def main():
     dataset_path = "dataset"
     train_loader = Dataloader(dataset_path, is_train=True, batch_size=32, shuffle=True)
     test_loader = Dataloader(dataset_path, is_train=False, batch_size=32, shuffle=False)
-    
+
+    # Check data
+    print("Checking data...")
+    for batch_images, batch_labels in train_loader:
+        print(f"Batch images shape: {batch_images.shape}")
+        print(f"Images range: [{batch_images.min():.3f}, {batch_images.max():.3f}]")
+        print(f"Labels shape: {batch_labels.shape}")
+        print(f"Label sample: {np.argmax(batch_labels[:5], axis=1)}")
+        break
+
     model = ThreeLayerNN()
-    
-    print("Training 3-layer Neural Network (Pure Python)...")
+
+    print("\nTraining 3-layer Neural Network (Pure Python)...")
     model.train(train_loader, test_loader, epochs=20, learning_rate=0.1)
     
     train_accuracy = model.get_accuracy(train_loader)

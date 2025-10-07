@@ -269,35 +269,65 @@ class ThreeLayerCNN:
     
     def train(self, train_loader, test_loader, epochs=10, learning_rate=0.01):
         print("Training 3-layer CNN (Pure Python - Full Implementation)...")
-        
+
         for epoch in range(epochs):
             train_loss = 0
             train_batches = 0
-            
+            train_correct = 0
+            train_total = 0
+
             for batch_idx, (batch_images, batch_labels) in enumerate(train_loader):
                 # Forward pass
                 y_pred = self.forward(batch_images)
                 loss = cross_entropy_loss(y_pred, batch_labels)
                 train_loss += loss
                 train_batches += 1
-                
+
+                # Calculate accuracy
+                predicted = np.argmax(y_pred, axis=1)
+                actual = np.argmax(batch_labels, axis=1)
+                train_correct += np.sum(predicted == actual)
+                train_total += batch_labels.shape[0]
+
                 # Backward pass
                 dout = cross_entropy_loss_gradient(y_pred, batch_labels)
                 self.backward(dout)
                 self.update_weights(learning_rate)
-                
+
                 # Print progress every 100 batches
                 if batch_idx % 100 == 0:
-                    print(f"  Epoch {epoch+1}, Batch {batch_idx}, Loss: {loss:.4f}")
-            
+                    current_acc = np.sum(predicted == actual) / batch_labels.shape[0]
+                    print(f"  Epoch {epoch+1}, Batch {batch_idx}, Loss: {loss:.4f}, Acc: {current_acc:.4f}")
+
             avg_train_loss = train_loss / train_batches
+            train_accuracy = train_correct / train_total
             self.train_losses.append(avg_train_loss)
-            
+
             # Evaluate on test set
-            test_loss = self.evaluate(test_loader)
-            self.test_losses.append(test_loss)
-            
-            print(f'Epoch {epoch+1}/{epochs}, Train Loss: {avg_train_loss:.4f}, Test Loss: {test_loss:.4f}')
+            test_loss = 0
+            test_batches = 0
+            test_correct = 0
+            test_total = 0
+
+            for batch_images, batch_labels in test_loader:
+                y_pred = self.forward(batch_images)
+                loss = cross_entropy_loss(y_pred, batch_labels)
+                test_loss += loss
+                test_batches += 1
+
+                # Calculate accuracy
+                predicted = np.argmax(y_pred, axis=1)
+                actual = np.argmax(batch_labels, axis=1)
+                test_correct += np.sum(predicted == actual)
+                test_total += batch_labels.shape[0]
+
+            avg_test_loss = test_loss / test_batches
+            test_accuracy = test_correct / test_total
+            self.test_losses.append(avg_test_loss)
+
+            print(f'Epoch {epoch+1}/{epochs}, '
+                  f'Train Loss: {avg_train_loss:.4f}, Train Acc: {train_accuracy:.4f}, '
+                  f'Test Loss: {avg_test_loss:.4f}, Test Acc: {test_accuracy:.4f}')
     
     def evaluate(self, test_loader):
         test_loss = 0
@@ -464,10 +494,19 @@ def main():
     dataset_path = "dataset"
     train_loader = Dataloader(dataset_path, is_train=True, batch_size=16, shuffle=True)
     test_loader = Dataloader(dataset_path, is_train=False, batch_size=16, shuffle=False)
-    
+
+    # Check data
+    print("Checking data...")
+    for batch_images, batch_labels in train_loader:
+        print(f"Batch images shape: {batch_images.shape}")
+        print(f"Images range: [{batch_images.min():.3f}, {batch_images.max():.3f}]")
+        print(f"Labels shape: {batch_labels.shape}")
+        print(f"Label sample: {np.argmax(batch_labels[:5], axis=1)}")
+        break
+
     model = ThreeLayerCNN()
-    
-    print("Training 3-layer CNN (Pure Python - Full Implementation)...")
+
+    print("\nTraining 3-layer CNN (Pure Python - Full Implementation)...")
     model.train(train_loader, test_loader, epochs=5, learning_rate=0.01)
     
     train_accuracy = model.get_accuracy(train_loader)

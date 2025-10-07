@@ -38,54 +38,72 @@ class ThreeLayerCNN(nn.Module):
 def train_model(model, train_loader, test_loader, epochs=20, learning_rate=0.001):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device)
-    
+
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=learning_rate)
-    
+
     for epoch in range(epochs):
         model.train()
         train_loss = 0
         train_batches = 0
-        
+        train_correct = 0
+        train_total = 0
+
         for batch_images, batch_labels in train_loader:
             batch_images = torch.FloatTensor(batch_images).to(device)
             batch_labels = torch.FloatTensor(batch_labels).to(device)
-            
+
             optimizer.zero_grad()
             outputs = model(batch_images)
-            
+
             targets = torch.argmax(batch_labels, dim=1)
             loss = criterion(outputs, targets)
-            
+
             loss.backward()
             optimizer.step()
-            
+
             train_loss += loss.item()
             train_batches += 1
-        
+
+            # Calculate accuracy
+            predicted = torch.argmax(outputs, dim=1)
+            train_total += targets.size(0)
+            train_correct += (predicted == targets).sum().item()
+
         avg_train_loss = train_loss / train_batches
+        train_accuracy = train_correct / train_total
         model.train_losses.append(avg_train_loss)
-        
+
         model.eval()
         test_loss = 0
         test_batches = 0
-        
+        test_correct = 0
+        test_total = 0
+
         with torch.no_grad():
             for batch_images, batch_labels in test_loader:
                 batch_images = torch.FloatTensor(batch_images).to(device)
                 batch_labels = torch.FloatTensor(batch_labels).to(device)
-                
+
                 outputs = model(batch_images)
                 targets = torch.argmax(batch_labels, dim=1)
                 loss = criterion(outputs, targets)
-                
+
                 test_loss += loss.item()
                 test_batches += 1
-        
+
+                # Calculate accuracy
+                predicted = torch.argmax(outputs, dim=1)
+                test_total += targets.size(0)
+                test_correct += (predicted == targets).sum().item()
+
         avg_test_loss = test_loss / test_batches
+        test_accuracy = test_correct / test_total
         model.test_losses.append(avg_test_loss)
-        
-        print(f'Epoch {epoch+1}/{epochs}, Train Loss: {avg_train_loss:.4f}, Test Loss: {avg_test_loss:.4f}')
+
+        print(f'Epoch {epoch+1}/{epochs}, '
+              f'Train Loss: {avg_train_loss:.4f}, Train Acc: {train_accuracy:.4f}, '
+              f'Test Loss: {avg_test_loss:.4f}, Test Acc: {test_accuracy:.4f}')
 
 def get_accuracy(model, loader):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -227,11 +245,20 @@ def main():
     dataset_path = "dataset"
     train_loader = Dataloader(dataset_path, is_train=True, batch_size=32, shuffle=True)
     test_loader = Dataloader(dataset_path, is_train=False, batch_size=32, shuffle=False)
-    
+
+    # Check data
+    print("Checking data...")
+    for batch_images, batch_labels in train_loader:
+        print(f"Batch images shape: {batch_images.shape}")
+        print(f"Images range: [{batch_images.min():.3f}, {batch_images.max():.3f}]")
+        print(f"Labels shape: {batch_labels.shape}")
+        print(f"Label sample: {np.argmax(batch_labels[:5], axis=1)}")
+        break
+
     model = ThreeLayerCNN()
-    
-    print("Training 3-layer CNN (PyTorch)...")
-    train_model(model, train_loader, test_loader, epochs=5, learning_rate=0.001)
+
+    print("\nTraining 3-layer CNN (PyTorch)...")
+    train_model(model, train_loader, test_loader, epochs=10, learning_rate=0.001)
     
     train_accuracy = get_accuracy(model, train_loader)
     test_accuracy = get_accuracy(model, test_loader)
