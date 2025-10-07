@@ -244,7 +244,7 @@ def plot_confusion_matrix(model, test_loader, save_path):
 
     # Normalize
     row_sums = confusion_matrix.sum(axis=1, keepdims=True)
-    confusion_matrix = np.divide(
+    confusion_matrix_norm = np.divide(
         confusion_matrix,
         row_sums,
         out=np.zeros_like(confusion_matrix, dtype=float),
@@ -252,35 +252,42 @@ def plot_confusion_matrix(model, test_loader, save_path):
     )
 
     # Visualization
-    plt.figure(figsize=(12, 10))
+    plt.figure(figsize=(14, 12))
 
-    sns.heatmap(
-        confusion_matrix,
-        annot=True,
-        fmt='.2f',
+    ax = sns.heatmap(
+        confusion_matrix_norm,
+        annot=False,  # Turn off default annotation
         cmap='Blues',
         square=True,
-        linewidths=1,
+        linewidths=1.5,
         linecolor='white',
-        cbar_kws={'label': 'Probability', 'shrink': 0.8},
-        annot_kws={'size': 10, 'weight': 'normal'},
+        cbar_kws={'label': 'Probability'},
         vmin=0,
         vmax=1,
         xticklabels=range(10),
         yticklabels=range(10)
     )
 
-    plt.xlabel('Predicted', fontsize=13, weight='bold')
-    plt.ylabel('Actual', fontsize=13, weight='bold')
-    plt.title('Confusion Matrix', fontsize=15, weight='bold', pad=15)
-    plt.xticks(fontsize=11)
-    plt.yticks(fontsize=11, rotation=0)
+    # Manually add text annotations to ensure all values are visible
+    for i in range(10):
+        for j in range(10):
+            text_color = "white" if confusion_matrix_norm[i, j] > 0.5 else "black"
+            ax.text(j + 0.5, i + 0.5, f'{confusion_matrix_norm[i, j]:.2f}',
+                   ha="center", va="center",
+                   color=text_color,
+                   fontsize=11, weight='bold')
+
+    plt.xlabel('Predicted', fontsize=14, weight='bold')
+    plt.ylabel('Actual', fontsize=14, weight='bold')
+    plt.title('Confusion Matrix', fontsize=16, weight='bold', pad=20)
+    plt.xticks(fontsize=12)
+    plt.yticks(fontsize=12, rotation=0)
 
     plt.tight_layout()
-    plt.savefig(save_path, dpi=200, bbox_inches='tight')
+    plt.savefig(save_path, dpi=300, bbox_inches='tight')
     plt.close()
 
-    return confusion_matrix
+    return confusion_matrix_norm
 
 def get_top3_images(model, test_loader, save_path):
     class_scores = [[] for _ in range(10)]
