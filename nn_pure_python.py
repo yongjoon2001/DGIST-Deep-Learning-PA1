@@ -361,5 +361,39 @@ def main():
     # Save model
     model.save_model("checkpoints/nn_pure_python/model.pkl")
 
+    # Save training metrics to text file
+    metrics_path = "checkpoints/nn_pure_python/training_metrics.txt"
+    with open(metrics_path, 'w') as f:
+        f.write("="*60 + "\n")
+        f.write("3-Layer Neural Network (Pure Python) - Training Metrics\n")
+        f.write("="*60 + "\n\n")
+
+        f.write("Model Architecture:\n")
+        f.write(f"  Input Layer: 784 neurons\n")
+        f.write(f"  Hidden Layer 1: 128 neurons (ReLU)\n")
+        f.write(f"  Hidden Layer 2: 64 neurons (ReLU)\n")
+        f.write(f"  Output Layer: 10 neurons (SoftMax)\n\n")
+
+        f.write("Training Configuration:\n")
+        f.write(f"  Epochs: 20\n")
+        f.write(f"  Learning Rate: 0.1\n")
+        f.write(f"  Batch Size: 32\n")
+        f.write(f"  Optimizer: SGD (manual)\n\n")
+
+        f.write("Final Results:\n")
+        f.write(f"  Train Accuracy: {train_accuracy:.4f} ({train_accuracy*100:.2f}%)\n")
+        f.write(f"  Test Accuracy: {test_accuracy:.4f} ({test_accuracy*100:.2f}%)\n")
+        f.write(f"  Final Train Loss: {model.train_losses[-1]:.4f}\n")
+        f.write(f"  Final Test Loss: {model.test_losses[-1]:.4f}\n\n")
+
+        f.write("Loss History (per epoch):\n")
+        f.write("-"*60 + "\n")
+        f.write(f"{'Epoch':<10} {'Train Loss':<15} {'Test Loss':<15}\n")
+        f.write("-"*60 + "\n")
+        for epoch, (train_loss, test_loss) in enumerate(zip(model.train_losses, model.test_losses), 1):
+            f.write(f"{epoch:<10} {train_loss:<15.4f} {test_loss:<15.4f}\n")
+
+    print(f"Training metrics saved to {metrics_path}")
+
 if __name__ == "__main__":
     main()

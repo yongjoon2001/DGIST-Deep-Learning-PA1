@@ -536,5 +536,42 @@ def main():
     # Save model
     model.save_model("checkpoints/cnn_pure_python/model.pkl")
 
+    # Save training metrics to text file
+    metrics_path = "checkpoints/cnn_pure_python/training_metrics.txt"
+    with open(metrics_path, 'w') as f:
+        f.write("="*60 + "\n")
+        f.write("3-Layer CNN (Pure Python) - Training Metrics\n")
+        f.write("="*60 + "\n\n")
+
+        f.write("Model Architecture:\n")
+        f.write(f"  Conv Layer 1: 1 -> 16 channels, 3x3 kernel, padding=1\n")
+        f.write(f"  ReLU + MaxPool (2x2, stride=2): 28x28 -> 14x14\n")
+        f.write(f"  Conv Layer 2: 16 -> 32 channels, 3x3 kernel, padding=1\n")
+        f.write(f"  ReLU + MaxPool (2x2, stride=2): 14x14 -> 7x7\n")
+        f.write(f"  Flatten: 32*7*7 = 1568\n")
+        f.write(f"  Linear: 1568 -> 10 (SoftMax)\n\n")
+
+        f.write("Training Configuration:\n")
+        f.write(f"  Epochs: 5\n")
+        f.write(f"  Learning Rate: 0.01\n")
+        f.write(f"  Batch Size: 16\n")
+        f.write(f"  Optimizer: SGD (manual)\n")
+        f.write(f"  Weight Initialization: Xavier/Glorot\n\n")
+
+        f.write("Final Results:\n")
+        f.write(f"  Train Accuracy: {train_accuracy:.4f} ({train_accuracy*100:.2f}%)\n")
+        f.write(f"  Test Accuracy: {test_accuracy:.4f} ({test_accuracy*100:.2f}%)\n")
+        f.write(f"  Final Train Loss: {model.train_losses[-1]:.4f}\n")
+        f.write(f"  Final Test Loss: {model.test_losses[-1]:.4f}\n\n")
+
+        f.write("Loss History (per epoch):\n")
+        f.write("-"*60 + "\n")
+        f.write(f"{'Epoch':<10} {'Train Loss':<15} {'Test Loss':<15}\n")
+        f.write("-"*60 + "\n")
+        for epoch, (train_loss, test_loss) in enumerate(zip(model.train_losses, model.test_losses), 1):
+            f.write(f"{epoch:<10} {train_loss:<15.4f} {test_loss:<15.4f}\n")
+
+    print(f"Training metrics saved to {metrics_path}")
+
 if __name__ == "__main__":
     main()
