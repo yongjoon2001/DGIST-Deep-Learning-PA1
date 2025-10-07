@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from dataset.dataloader import Dataloader
 import os
+import pickle
 
 class LinearLayer:
     def __init__(self, input_size, output_size):
@@ -139,7 +140,7 @@ class ThreeLayerNN:
     def get_accuracy(self, loader):
         correct = 0
         total = 0
-        
+
         for batch_images, batch_labels in loader:
             batch_images = batch_images.reshape(batch_images.shape[0], -1)
             y_pred = self.forward(batch_images)
@@ -147,8 +148,40 @@ class ThreeLayerNN:
             actual = np.argmax(batch_labels, axis=1)
             correct += np.sum(predicted == actual)
             total += batch_labels.shape[0]
-        
+
         return correct / total
+
+    def save_model(self, filepath):
+        """Save model parameters to file"""
+        model_data = {
+            'layer1_W': self.layer1.W,
+            'layer1_b': self.layer1.b,
+            'layer2_W': self.layer2.W,
+            'layer2_b': self.layer2.b,
+            'layer3_W': self.layer3.W,
+            'layer3_b': self.layer3.b,
+            'train_losses': self.train_losses,
+            'test_losses': self.test_losses
+        }
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        with open(filepath, 'wb') as f:
+            pickle.dump(model_data, f)
+        print(f"Model saved to {filepath}")
+
+    def load_model(self, filepath):
+        """Load model parameters from file"""
+        with open(filepath, 'rb') as f:
+            model_data = pickle.load(f)
+
+        self.layer1.W = model_data['layer1_W']
+        self.layer1.b = model_data['layer1_b']
+        self.layer2.W = model_data['layer2_W']
+        self.layer2.b = model_data['layer2_b']
+        self.layer3.W = model_data['layer3_W']
+        self.layer3.b = model_data['layer3_b']
+        self.train_losses = model_data['train_losses']
+        self.test_losses = model_data['test_losses']
+        print(f"Model loaded from {filepath}")
 
 def plot_loss_graph(model, save_path):
     plt.figure(figsize=(10, 6))
@@ -165,7 +198,7 @@ def plot_loss_graph(model, save_path):
 def plot_confusion_matrix(model, test_loader, save_path):
     all_predictions = []
     all_labels = []
-    
+
     for batch_images, batch_labels in test_loader:
         batch_images = batch_images.reshape(batch_images.shape[0], -1)
         y_pred = model.forward(batch_images)
@@ -173,21 +206,49 @@ def plot_confusion_matrix(model, test_loader, save_path):
         actual = np.argmax(batch_labels, axis=1)
         all_predictions.extend(predicted)
         all_labels.extend(actual)
-    
+
     confusion_matrix = np.zeros((10, 10))
     for true, pred in zip(all_labels, all_predictions):
         confusion_matrix[true][pred] += 1
-    
-    confusion_matrix = confusion_matrix / confusion_matrix.sum(axis=1, keepdims=True)
-    
-    plt.figure(figsize=(10, 8))
-    sns.heatmap(confusion_matrix, annot=True, fmt='.3f', cmap='Blues')
-    plt.xlabel('Predicted')
-    plt.ylabel('Actual')
-    plt.title('Confusion Matrix')
-    plt.savefig(save_path)
+
+    # Normalize
+    row_sums = confusion_matrix.sum(axis=1, keepdims=True)
+    confusion_matrix = np.divide(
+        confusion_matrix,
+        row_sums,
+        out=np.zeros_like(confusion_matrix, dtype=float),
+        where=row_sums!=0
+    )
+
+    # Visualization
+    plt.figure(figsize=(12, 10))
+
+    sns.heatmap(
+        confusion_matrix,
+        annot=True,
+        fmt='.2f',
+        cmap='Blues',
+        square=True,
+        linewidths=1,
+        linecolor='white',
+        cbar_kws={'label': 'Probability', 'shrink': 0.8},
+        annot_kws={'size': 10, 'weight': 'normal'},
+        vmin=0,
+        vmax=1,
+        xticklabels=range(10),
+        yticklabels=range(10)
+    )
+
+    plt.xlabel('Predicted', fontsize=13, weight='bold')
+    plt.ylabel('Actual', fontsize=13, weight='bold')
+    plt.title('Confusion Matrix', fontsize=15, weight='bold', pad=15)
+    plt.xticks(fontsize=11)
+    plt.yticks(fontsize=11, rotation=0)
+
+    plt.tight_layout()
+    plt.savefig(save_path, dpi=200, bbox_inches='tight')
     plt.close()
-    
+
     return confusion_matrix
 
 def get_top3_images(model, test_loader, save_path):
@@ -249,6 +310,9 @@ def main():
     
     get_top3_images(model, test_loader, f"{results_dir}/top3_images.png")
     print("Top 3 images saved!")
+
+    # Save model
+    model.save_model("checkpoints/nn_pure_python/model.pkl")
 
 if __name__ == "__main__":
     main()

@@ -122,44 +122,64 @@ def plot_loss_graph(model, save_path):
 def plot_confusion_matrix(model, test_loader, save_path):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.eval()
-    
+
     all_predictions = []
     all_labels = []
-    
+
     with torch.no_grad():
         for batch_images, batch_labels in test_loader:
             batch_images = torch.FloatTensor(batch_images).to(device)
             batch_labels = torch.FloatTensor(batch_labels).to(device)
-            
+
             outputs = model(batch_images)
             predicted = torch.argmax(outputs, dim=1).cpu().numpy()
             actual = torch.argmax(batch_labels, dim=1).cpu().numpy()
-            
+
             all_predictions.extend(predicted)
             all_labels.extend(actual)
-    
+
     confusion_matrix = np.zeros((10, 10))
     for true, pred in zip(all_labels, all_predictions):
         confusion_matrix[true][pred] += 1
-    
-    # Debug output
-    print(f"Unique predictions: {np.unique(all_predictions)}")
-    print(f"Unique actual labels: {np.unique(all_labels)}")
-    
-    # Normalize and handle division by zero
+
+    # Normalize
     row_sums = confusion_matrix.sum(axis=1, keepdims=True)
-    confusion_matrix = np.divide(confusion_matrix, row_sums, 
-                                out=np.zeros_like(confusion_matrix), 
-                                where=row_sums!=0)
-    
-    plt.figure(figsize=(10, 8))
-    sns.heatmap(confusion_matrix, annot=True, fmt='.3f', cmap='Blues')
-    plt.xlabel('Predicted')
-    plt.ylabel('Actual')
-    plt.title('Confusion Matrix (CNN PyTorch)')
-    plt.savefig(save_path)
+    confusion_matrix = np.divide(
+        confusion_matrix,
+        row_sums,
+        out=np.zeros_like(confusion_matrix, dtype=float),
+        where=row_sums!=0
+    )
+
+    # Visualization
+    plt.figure(figsize=(12, 10))
+
+    sns.heatmap(
+        confusion_matrix,
+        annot=True,
+        fmt='.2f',
+        cmap='Blues',
+        square=True,
+        linewidths=1,
+        linecolor='white',
+        cbar_kws={'label': 'Probability', 'shrink': 0.8},
+        annot_kws={'size': 10, 'weight': 'normal'},
+        vmin=0,
+        vmax=1,
+        xticklabels=range(10),
+        yticklabels=range(10)
+    )
+
+    plt.xlabel('Predicted', fontsize=13, weight='bold')
+    plt.ylabel('Actual', fontsize=13, weight='bold')
+    plt.title('Confusion Matrix (CNN PyTorch)', fontsize=15, weight='bold', pad=15)
+    plt.xticks(fontsize=11)
+    plt.yticks(fontsize=11, rotation=0)
+
+    plt.tight_layout()
+    plt.savefig(save_path, dpi=200, bbox_inches='tight')
     plt.close()
-    
+
     return confusion_matrix
 
 def get_top3_images(model, test_loader, save_path):
@@ -229,6 +249,16 @@ def main():
     
     get_top3_images(model, test_loader, f"{results_dir}/top3_images.png")
     print("Top 3 images saved!")
+
+    # Save model
+    checkpoint_dir = "checkpoints/cnn_framework"
+    os.makedirs(checkpoint_dir, exist_ok=True)
+    torch.save({
+        'model_state_dict': model.state_dict(),
+        'train_losses': model.train_losses,
+        'test_losses': model.test_losses
+    }, f"{checkpoint_dir}/model.pth")
+    print(f"Model saved to {checkpoint_dir}/model.pth")
 
 if __name__ == "__main__":
     main()
