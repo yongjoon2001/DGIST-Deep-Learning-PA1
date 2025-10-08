@@ -1,0 +1,48 @@
+============================================================
+3-Layer Neural Network (PyTorch) - Training Metrics
+============================================================
+
+Model Architecture:
+  Input Layer: 784 neurons
+  Hidden Layer 1: 128 neurons (ReLU)
+  Hidden Layer 2: 64 neurons (ReLU)
+  Output Layer: 10 neurons (CrossEntropyLoss)
+
+Training Configuration:
+  Epochs: 20
+  Learning Rate: 0.01
+  Batch Size: 32
+  Optimizer: SGD (momentum=0.9)
+  Loss Function: CrossEntropyLoss
+  Device: CPU
+
+Final Results:
+  Train Accuracy: 0.9997 (99.97%)
+  Test Accuracy: 0.9797 (97.97%)
+  Final Train Loss: 0.0013
+  Final Test Loss: 0.1024
+
+Loss History (per epoch):
+------------------------------------------------------------
+Epoch      Train Loss      Test Loss      
+------------------------------------------------------------
+1          0.3966          0.1655         
+2          0.1361          0.1233         
+3          0.0926          0.1157         
+4          0.0693          0.1022         
+5          0.0536          0.0938         
+6          0.0427          0.0861         
+7          0.0330          0.0819         
+8          0.0258          0.0826         
+9          0.0211          0.0841         
+10         0.0164          0.0917         
+11         0.0141          0.0908         
+12         0.0120          0.0934         
+13         0.0093          0.1033         
+14         0.0077          0.0927         
+15         0.0061          0.1007         
+16         0.0059          0.1058         
+17         0.0055          0.1046         
+18         0.0028          0.1020         
+19         0.0020          0.1027         
+20         0.0013          0.1024         

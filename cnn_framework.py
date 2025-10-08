@@ -36,7 +36,12 @@ class ThreeLayerCNN(nn.Module):
         return x
 
 def train_model(model, train_loader, test_loader, epochs=20, learning_rate=0.001):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    if torch.cuda.is_available():
+        device = torch.device("cuda")
+    elif torch.backends.mps.is_available():
+        device = torch.device("mps")
+    else:
+        device = torch.device("cpu")
     model.to(device)
 
     criterion = nn.CrossEntropyLoss()
@@ -50,8 +55,8 @@ def train_model(model, train_loader, test_loader, epochs=20, learning_rate=0.001
         train_total = 0
 
         for batch_images, batch_labels in train_loader:
-            batch_images = torch.FloatTensor(batch_images).to(device)
-            batch_labels = torch.FloatTensor(batch_labels).to(device)
+            batch_images = torch.tensor(batch_images, dtype=torch.float32, device=device)
+            batch_labels = torch.tensor(batch_labels, dtype=torch.float32, device=device)
 
             optimizer.zero_grad()
             outputs = model(batch_images)
@@ -82,8 +87,8 @@ def train_model(model, train_loader, test_loader, epochs=20, learning_rate=0.001
 
         with torch.no_grad():
             for batch_images, batch_labels in test_loader:
-                batch_images = torch.FloatTensor(batch_images).to(device)
-                batch_labels = torch.FloatTensor(batch_labels).to(device)
+                batch_images = torch.tensor(batch_images, dtype=torch.float32, device=device)
+                batch_labels = torch.tensor(batch_labels, dtype=torch.float32, device=device)
 
                 outputs = model(batch_images)
                 targets = torch.argmax(batch_labels, dim=1)
@@ -106,15 +111,20 @@ def train_model(model, train_loader, test_loader, epochs=20, learning_rate=0.001
               f'Test Loss: {avg_test_loss:.4f}, Test Acc: {test_accuracy:.4f}')
 
 def get_accuracy(model, loader):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    if torch.cuda.is_available():
+        device = torch.device("cuda")
+    elif torch.backends.mps.is_available():
+        device = torch.device("mps")
+    else:
+        device = torch.device("cpu")
     model.eval()
     correct = 0
     total = 0
     
     with torch.no_grad():
         for batch_images, batch_labels in loader:
-            batch_images = torch.FloatTensor(batch_images).to(device)
-            batch_labels = torch.FloatTensor(batch_labels).to(device)
+            batch_images = torch.tensor(batch_images, dtype=torch.float32, device=device)
+            batch_labels = torch.tensor(batch_labels, dtype=torch.float32, device=device)
             
             outputs = model(batch_images)
             predicted = torch.argmax(outputs, dim=1)
@@ -138,7 +148,12 @@ def plot_loss_graph(model, save_path):
     plt.close()
 
 def plot_confusion_matrix(model, test_loader, save_path):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    if torch.cuda.is_available():
+        device = torch.device("cuda")
+    elif torch.backends.mps.is_available():
+        device = torch.device("mps")
+    else:
+        device = torch.device("cpu")
     model.eval()
 
     all_predictions = []
@@ -146,8 +161,8 @@ def plot_confusion_matrix(model, test_loader, save_path):
 
     with torch.no_grad():
         for batch_images, batch_labels in test_loader:
-            batch_images = torch.FloatTensor(batch_images).to(device)
-            batch_labels = torch.FloatTensor(batch_labels).to(device)
+            batch_images = torch.tensor(batch_images, dtype=torch.float32, device=device)
+            batch_labels = torch.tensor(batch_labels, dtype=torch.float32)
 
             outputs = model(batch_images)
             predicted = torch.argmax(outputs, dim=1).cpu().numpy()
@@ -208,7 +223,12 @@ def plot_confusion_matrix(model, test_loader, save_path):
     return confusion_matrix_norm
 
 def get_top3_images(model, test_loader, save_path):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    if torch.cuda.is_available():
+        device = torch.device("cuda")
+    elif torch.backends.mps.is_available():
+        device = torch.device("mps")
+    else:
+        device = torch.device("cpu")
     model.eval()
     
     class_scores = [[] for _ in range(10)]
@@ -216,8 +236,8 @@ def get_top3_images(model, test_loader, save_path):
     
     with torch.no_grad():
         for batch_images, batch_labels in test_loader:
-            batch_images_tensor = torch.FloatTensor(batch_images).to(device)
-            batch_labels_tensor = torch.FloatTensor(batch_labels).to(device)
+            batch_images_tensor = torch.tensor(batch_images, dtype=torch.float32, device=device)
+            batch_labels_tensor = torch.tensor(batch_labels, dtype=torch.float32, device=device)
             
             outputs = model(batch_images_tensor)
             outputs_softmax = F.softmax(outputs, dim=1)  # Apply softmax for confidence

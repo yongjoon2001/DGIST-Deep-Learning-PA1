@@ -1,0 +1,34 @@
+============================================================
+3-Layer CNN (Pure Python) - Training Metrics
+============================================================
+
+Model Architecture:
+  Conv Layer 1: 1 -> 16 channels, 3x3 kernel, padding=1
+  ReLU + MaxPool (2x2, stride=2): 28x28 -> 14x14
+  Conv Layer 2: 16 -> 32 channels, 3x3 kernel, padding=1
+  ReLU + MaxPool (2x2, stride=2): 14x14 -> 7x7
+  Flatten: 32*7*7 = 1568
+  Linear: 1568 -> 10 (SoftMax)
+
+Training Configuration:
+  Epochs: 5
+  Learning Rate: 0.01
+  Batch Size: 16
+  Optimizer: SGD (manual)
+  Weight Initialization: Xavier/Glorot
+
+Final Results:
+  Train Accuracy: 0.9817 (98.17%)
+  Test Accuracy: 0.9817 (98.17%)
+  Final Train Loss: 0.0632
+  Final Test Loss: 0.0565
+
+Loss History (per epoch):
+------------------------------------------------------------
+Epoch      Train Loss      Test Loss      
+------------------------------------------------------------
+1          0.3701          0.1240         
+2          0.1147          0.0866         
+3          0.0857          0.0714         
+4          0.0718          0.0626         
+5          0.0632          0.0565         

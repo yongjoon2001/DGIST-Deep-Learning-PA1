@@ -1,0 +1,40 @@
+============================================================
+3-Layer CNN (PyTorch) - Training Metrics
+============================================================
+
+Model Architecture:
+  Conv Layer 1: 1 -> 16 channels, 3x3 kernel, padding=1
+  ReLU + MaxPool (2x2, stride=2): 28x28 -> 14x14
+  Conv Layer 2: 16 -> 32 channels, 3x3 kernel, padding=1
+  ReLU + MaxPool (2x2, stride=2): 14x14 -> 7x7
+  Flatten: 32*7*7 = 1568
+  Linear: 1568 -> 10 (CrossEntropyLoss)
+
+Training Configuration:
+  Epochs: 10
+  Learning Rate: 0.001
+  Batch Size: 32
+  Optimizer: Adam
+  Loss Function: CrossEntropyLoss
+  Device: CPU
+
+Final Results:
+  Train Accuracy: 0.9952 (99.52%)
+  Test Accuracy: 0.9877 (98.77%)
+  Final Train Loss: 0.0127
+  Final Test Loss: 0.0463
+
+Loss History (per epoch):
+------------------------------------------------------------
+Epoch      Train Loss      Test Loss      
+------------------------------------------------------------
+1          0.1724          0.0643         
+2          0.0614          0.0481         
+3          0.0462          0.0393         
+4          0.0364          0.0373         
+5          0.0292          0.0382         
+6          0.0235          0.0411         
+7          0.0195          0.0420         
+8          0.0169          0.0469         
+9          0.0143          0.0464         
+10         0.0127          0.0463         
