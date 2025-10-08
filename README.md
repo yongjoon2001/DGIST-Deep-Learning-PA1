@@ -21,33 +21,55 @@ MNIST digit classification using 4 implementations:
 
 ```
 PA1/
-├── nn_pure_python.py          # NN Pure Python implementation
-├── nn_framework.py            # NN PyTorch implementation
-├── cnn_pure_python.py         # CNN Pure Python implementation
-├── cnn_framework.py           # CNN PyTorch implementation
-├── run_all.py                 # Run all models
+├── 🐍 Python Implementation Files (60KB total)
+│   ├── nn_pure_python.py          (14KB)  - NN Pure Python implementation
+│   ├── nn_framework.py            (12KB)  - NN PyTorch implementation
+│   ├── cnn_pure_python.py         (21KB)  - CNN Pure Python implementation
+│   ├── cnn_framework.py           (13KB)  - CNN PyTorch implementation
+│   └── run_all.py                 (1.6KB) - Run all models at once
 │
-├── dataset/
-│   ├── dataloader.py
-│   ├── train-images-idx3-ubyte.gz
-│   ├── train-labels-idx1-ubyte.gz
-│   ├── t10k-images-idx3-ubyte.gz
-│   └── t10k-labels-idx1-ubyte.gz
+├── 💾 Dataset (11MB - EXCLUDE from submission)
+│   ├── dataloader.py              (2.1KB)  - Data loader (INCLUDE in submission)
+│   ├── train-images-idx3-ubyte.gz (9.5MB)  - Training images (60,000)
+│   ├── train-labels-idx1-ubyte.gz (28KB)   - Training labels
+│   ├── t10k-images-idx3-ubyte.gz  (1.6MB)  - Test images (10,000)
+│   └── t10k-labels-idx1-ubyte.gz  (4.4KB)  - Test labels
 │
-├── checkpoints/               # Saved models (auto-generated)
+├── 💼 Checkpoints (1.5MB - EXCLUDE from submission)
 │   ├── nn_pure_python/
+│   │   ├── model.pkl              (856KB)  - Trained weights (NumPy)
+│   │   └── training_metrics.txt   (1.6KB)  - Training summary
 │   ├── nn_framework/
+│   │   ├── model.pth              (430KB)  - PyTorch checkpoint
+│   │   └── training_metrics.txt   (1.6KB)
 │   ├── cnn_pure_python/
+│   │   ├── model.pkl              (161KB)  - CNN weights
+│   │   └── training_metrics.txt   (1.1KB)
 │   └── cnn_framework/
+│       ├── model.pth              (83KB)   - CNN checkpoint
+│       └── training_metrics.txt   (1.3KB)
 │
-└── results/                   # Visualization outputs (auto-generated)
+└── 📊 Results (1.5MB - USE in PDF report)
     ├── nn_pure_python/
-    │   ├── loss_graph.png
-    │   ├── confusion_matrix.png
-    │   └── top3_images.png
+    │   ├── loss_graph.png         (35KB)   - Training/test loss curves
+    │   ├── confusion_matrix.png   (219KB)  - 10×10 classification matrix
+    │   └── top3_images.png        (101KB)  - Top 3 confident predictions
     ├── nn_framework/
+    │   ├── loss_graph.png         (38KB)
+    │   ├── confusion_matrix.png   (224KB)
+    │   └── top3_images.png        (100KB)
     ├── cnn_pure_python/
+    │   ├── loss_graph.png         (38KB)
+    │   ├── confusion_matrix.png   (231KB)
+    │   └── top3_images.png        (101KB)
     └── cnn_framework/
+        ├── loss_graph.png         (37KB)
+        ├── confusion_matrix.png   (217KB)
+        └── top3_images.png        (99KB)
+
+📄 Documentation
+├── README.md                      (4.2KB)  - This file
+└── PA1_NN_CNN.pdf                 (435KB)  - Assignment instructions
 ```
 
 ---
@@ -120,18 +142,6 @@ Each model generates:
 4. **Training Metrics** (`training_metrics.txt`)
    - Model architecture, hyperparameters, and results
 
----
-
-## 📈 Expected Performance
-
-| Model | Train Acc | Test Acc | Training Time (CPU) |
-|-------|-----------|----------|---------------------|
-| NN Pure Python | ~97% | ~95% | ~2 min |
-| NN PyTorch | ~98% | ~96% | ~30 sec |
-| CNN Pure Python | ~95% | ~92% | ~10 min |
-| CNN PyTorch | ~99% | ~98% | ~1 min |
-
----
 
 ## 🔧 Implementation Details
 
@@ -170,31 +180,9 @@ python cnn_framework.py
 ```
 RuntimeError: Input type (torch.FloatTensor) and weight type (MPSFloatType) should be the same
 ```
-**Solution**: Fixed in v1.4 - tensors are now created directly on the target device.
-
 ### Memory Error (CNN Pure Python)
 **Solution**: Reduce batch size in the code (16 → 8).
 
----
-
-## 📝 Assignment Submission
-
-**Due**: October 16, 2024, 14:30 PM
-**Submit to**: lms.dgist.ac.kr
-
-**File format**: `PA1_studentID_name.zip`
-
-**Contents**:
-1. Source code (4 Python files)
-2. PDF report with results:
-   - Loss graphs (train & test)
-   - 10×10 Confusion matrices
-   - Top 3 images per class
-   - Comparison of all 4 models
-
-**Note**: Exclude dataset files from submission.
-
----
 
 ## 📚 References
 
@@ -204,17 +192,10 @@ RuntimeError: Input type (torch.FloatTensor) and weight type (MPSFloatType) shou
 
 ---
 
-## 👨‍💻 Author
+## 👨‍💻 Author: Chon Yongjoon
 
 **Course**: CSE303 Introduction to Deep Learning
 **Institution**: DGIST
 **GitHub**: https://github.com/yongjoon2001/DGIST-Deep-Learning-PA1
 
 ---
-
-## 📌 Version History
-
-- **v1.4** (2025-10-08): Apple Silicon GPU (MPS) support
-- **v1.3** (2025-10-07): Training metrics text file
-- **v1.2** (2025-10-07): Improved confusion matrix visualization
-- **v1.1** (2025-10-07): Optimizer optimization
