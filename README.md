@@ -69,7 +69,8 @@ PA1/
 
 📄 Documentation
 ├── README.md                      (4.2KB)  - This file
-└── PA1_NN_CNN.pdf                 (435KB)  - Assignment instructions
+├── PA1_NN_CNN.pdf                 (435KB)  - Assignment instructions
+└── report.pdf                     (TBD)    - Assignment report with results
 ```
 
 ---
